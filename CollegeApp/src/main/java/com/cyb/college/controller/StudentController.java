@@ -8,16 +8,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.websocket.server.PathParam;
+
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cyb.college.dto.Expense;
@@ -26,11 +31,14 @@ import com.cyb.college.entity.LoginDetails;
 import com.cyb.college.entity.Sport;
 import com.cyb.college.entity.Student;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin
+@RequestMapping("/college")
 @RestController
 public class StudentController {
     @Autowired
     private StudentRepository studRepo;
+    @Autowired
+    private LoginRepository loginRepo;
     
     @PostMapping(path = "/saveStudent")
     public Student saveStudent(@RequestBody StudentDTO stDTO) {
@@ -60,22 +68,27 @@ public class StudentController {
     @GetMapping(path = "/getUserDetails/{userId}")
     public Student getUserDetails(@PathVariable("userId") Long userId) {
         HSSFWorkbook myExcelBook;
+        System.out.println("HITTTTTTTTTTTTTTTTTTTTT");
         List<Expense> expenseList = new ArrayList<>();
         Expense expense = null;
         try {
-            myExcelBook = new HSSFWorkbook(new FileInputStream("D:\\CollegeApp\\CollegeApp\\src\\test3.xls"));
+            myExcelBook = new HSSFWorkbook(new FileInputStream("D:\\BootCollegeApp\\CollegeApp\\src\\test4.xls"));
             HSSFSheet myExcelSheet = myExcelBook.getSheet("test");
-            for (int i = 14; i < 42; i++) {
+            for (int i = 20; i < 42; i++) {
                 Row row = myExcelSheet.getRow(i);
                 String date = row.getCell(3).getStringCellValue();
                 String name = row.getCell(5).getStringCellValue();
                 double withDraw = row.getCell(6).getNumericCellValue();
                 double bal = row.getCell(8).getNumericCellValue();
-                String newName = name.replaceAll("[0-9]", "").replace("MPS/", "").replace("BIL/", "")
+                String newName="abh";
+                /*String newName = name.replaceAll("[0-9]", "").replace("MPS/", "").replace("BIL/", "")
                         .replace("ATM/", "").replace("NFS/", "").replace("MMT/", "").replace("MPS/", "")
                         .replace("PUBN/", "").replace("IPS/", "").replace("MIN/", "").replace("IIN/", "")
                         .replace("ONL/", "").replace("INFT/", "").replace("SFCNQ/", "").replace("///PUNE", "")
-                        .replace("///", "");
+                        .replace("///", "");*/
+               
+               System.out.println( "Change "+name.substring(name.lastIndexOf('/', name.lastIndexOf('/') - 1), name.length() - 1));
+            
                 System.out.println("name : " + newName + " || Withdrw :: " + withDraw + " || Balance ::: " + bal
                         + " Date ::" + date);
                 expense = new Expense();
@@ -98,12 +111,29 @@ public class StudentController {
     
     @GetMapping(path = "/getUserDetailsByRollNum/{rollNum}")
     public Student getUserDetailsByRollNum(@PathVariable("rollNum") Long rollNum) {
-        return studRepo.findByRollNum(rollNum);
+        
+    	if(rollNum==0) {
+    		try {
+				throw new Exception();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    	
+    	return studRepo.findByRollNum(rollNum);
     }
     
-    @GetMapping(path = "/helloStudent")
-    public String helloStudent() {
-        List<String> test = new ArrayList<>();
-        return "hi";
+    @GetMapping(path = "/validateLogin/{username}/{userpwd}")
+    public LoginDetails helloStudent(@PathVariable("username") String username,@PathVariable("userpwd") String userpwd) {
+    	 if(username.equals("rahul")) {
+        	 //return new ResponseEntity("Invalid Name",HttpStatus.BAD_REQUEST);
+         }
+        
+        return loginRepo.findByUserNameAndUserPwd(username, userpwd);
+        
     }
+    
+    
+    
 }

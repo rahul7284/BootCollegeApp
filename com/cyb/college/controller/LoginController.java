@@ -19,4 +19,11 @@ public class LoginController {
             @PathVariable("userPwd") String userPwd) {
         return loginRepo.findByUserNameAndUserPwd(userName, userPwd);
     }
+
+
+    public static void main(String[] args) {
+        List<String> numberList = Arrays.asList("1","2","3","4",5);
+
+        
+    }
 }
